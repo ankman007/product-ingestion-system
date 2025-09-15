@@ -1,14 +1,19 @@
-# Use official Python image
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Upgrade pip
+RUN pip install --upgrade pip
 
-# Copy project files
-COPY . .
+# Copy dependencies
+COPY requirements.txt /app/
+RUN pip install -r requirements.txt
 
-# Run server
+# Copy project
+COPY . /app/
+
+RUN mkdir -p /app/media
+
+EXPOSE 8000
+
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
