@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.response import Response
 from django.db import transaction
 from loguru import logger
+from rest_framework import status
 
 from .utils import read_file, validate_dataframe
 from .models import Product
@@ -18,15 +19,31 @@ def product_list(request):
     if request.method == 'GET':
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        return Response({
+            "statusCode": status.HTTP_200_OK,
+            "success": True,
+            "message": "Products fetched successfully",
+            "data": serializer.data
+        }, status=status.HTTP_200_OK)
 
     elif request.method == 'POST':
         data = JSONParser().parse(request)
         serializer = ProductSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
+            return Response({
+                "statusCode": status.HTTP_201_CREATED,
+                "success": True,
+                "message": "Product created successfully",
+                "data": serializer.data
+            }, status=status.HTTP_201_CREATED)
+
+        return Response({
+            "statusCode": status.HTTP_400_BAD_REQUEST,
+            "success": False,
+            "message": "Validation failed",
+            "data": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
@@ -34,23 +51,49 @@ def product_detail(request, pk):
     try:
         product = Product.objects.get(pk=pk)
     except Product.DoesNotExist:
-        raise Http404("Product not found")
+        return Response({
+            "statusCode": status.HTTP_404_NOT_FOUND,
+            "success": False,
+            "message": "Product not found",
+            "data": None
+        }, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = ProductSerializer(product)
-        return JsonResponse(serializer.data)
+        return Response({
+            "statusCode": status.HTTP_200_OK,
+            "success": True,
+            "message": "Product fetched successfully",
+            "data": serializer.data
+        }, status=status.HTTP_200_OK)
 
     elif request.method in ['PUT', 'PATCH']:
         data = JSONParser().parse(request)
         serializer = ProductSerializer(product, data=data, partial=(request.method == 'PATCH'))
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
+            return Response({
+                "statusCode": status.HTTP_200_OK,
+                "success": True,
+                "message": "Product updated successfully",
+                "data": serializer.data
+            }, status=status.HTTP_200_OK)
+
+        return Response({
+            "statusCode": status.HTTP_400_BAD_REQUEST,
+            "success": False,
+            "message": "Validation failed",
+            "data": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         product.delete()
-        return JsonResponse({'message': 'Product deleted successfully'}, status=204)
+        return Response({
+            "statusCode": status.HTTP_204_NO_CONTENT,
+            "success": True,
+            "message": "Product deleted successfully",
+            "data": None
+        }, status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['POST'])
@@ -58,7 +101,12 @@ def product_detail(request, pk):
 def product_upload(request):
     files = request.FILES.getlist('file')
     if not files:
-        return Response({"error": "No files uploaded"}, status=400)
+        return Response({
+            "statusCode": status.HTTP_400_BAD_REQUEST,
+            "success": False,
+            "message": "No files uploaded",
+            "data": None
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     response_summary = []
 
@@ -104,7 +152,12 @@ def product_upload(request):
         file_result['processed'] = processed_count
         response_summary.append(file_result)
 
-    return Response({"files": response_summary}, status=200)
+    return Response({
+        "statusCode": status.HTTP_200_OK,
+        "success": True,
+        "message": "File(s) processed successfully",
+        "data": {"files": response_summary}
+    }, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -122,4 +175,10 @@ def api_root(request):
             "POST /api/products/upload/": "Upload CSV/Excel file(s) to bulk create/update products"
         }
     }
-    return Response(api_info)
+
+    return Response({
+        "statusCode": status.HTTP_200_OK,
+        "success": True,
+        "message": "API root endpoint",
+        "data": api_info
+    }, status=status.HTTP_200_OK)
