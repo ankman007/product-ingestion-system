@@ -105,3 +105,21 @@ def product_upload(request):
         response_summary.append(file_result)
 
     return Response({"files": response_summary}, status=200)
+
+
+@api_view(['GET'])
+def api_root(request):
+    api_info = {
+        "Products": {
+            "GET /api/products/": "Retrieve a list of all products",
+            "POST /api/products/": "Create a new product",
+            "GET /api/products/{id}/": "Retrieve a single product by ID",
+            "PUT /api/products/{id}/": "Update all fields of a product by ID",
+            "PATCH /api/products/{id}/": "Partially update a product by ID",
+            "DELETE /api/products/{id}/": "Delete a product by ID"
+        },
+        "File Upload": {
+            "POST /api/products/upload/": "Upload CSV/Excel file(s) to bulk create/update products"
+        }
+    }
+    return Response(api_info)
