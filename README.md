@@ -1,8 +1,12 @@
 # Project Description
 
-A product ingestion system built with DRF that allows you to manage products and bulk import them from CSV/Excel files. The project is containerized with Docker for easy setup and includes an admin panel for managing product data.  
+The Product Ingestion System is a backend service built with Django REST Framework (DRF) that provides a robust API for managing products and bulk uploading them from CSV/Excel files. The project is fully containerized using Docker & Docker Compose, making it easy to set up and run in any environment.
 
-The feature set for this project are as follows:
+🔗 [Postman Docs](https://documenter.getpostman.com/view/32993281/2sB3HqHyLC)
+
+---
+
+## Key Features
 - **Multiple File Support**: Upload and process multiple files in a single API call.  
 - **Product Management API**: Create, update, delete, and fetch products.  
 - **Bulk File Upload**: Import product data directly from CSV or Excel files.  
@@ -24,60 +28,14 @@ The feature set for this project are as follows:
 
 ## API Endpoints
 
-### Products  
 - `GET /api/products/` → List all products  
 - `POST /api/products/` → Create a new product  
 - `GET /api/products/{id}/` → Retrieve a single product  
 - `PUT/PATCH /api/products/{id}/` → Update a product  
 - `DELETE /api/products/{id}/` → Delete a product  
-
-### File Upload  
 - `POST /api/products/upload/` → Upload CSV/Excel file(s)  
 
-📌 **Testing file upload in Postman**  
-- Body → form-data → `key: file` → upload `.csv` or `.xlsx`  
-
-**Sample CSV:**  
-```csv
-sku,name,category,price,stock_qty,status
-SKU0001,Product 1,Clothing,232.54,189,inactive
-SKU0002,Product 2,Electronics,337.42,60,active
-SKU0003,Product 3,Home,416.91,104,inactive
-```
-
-📑 **Multiple File Uploads**
-- You can upload multiple files in a single API call.
-- Each file will be processed separately, and the response will show the status for each file.
-
-**Sample Response (multiple files):**
-```
-{
-    "files": [
-        {
-            "file": "products_1.xlsx",
-            "processed": 8,
-            "errors": []
-        },
-        {
-            "file": "products_2.csv",
-            "processed": 1000,
-            "errors": []
-        },
-        {
-            "file": "products_3.xlsx",
-            "processed": 1000,
-            "errors": []
-        }
-    ]
-}
-```
-
----
-
-## Django Admin
-- Create superuser with command `docker-compose exec web python manage.py createsuperuser`
-- Then, login with same credentials at route: http://127.0.0.1:8000/admin/
-- You can manage products with search, filters, list view on admin page.
+Note: For complete API details and usage examples, refer to the published Postman documentation [here](https://documenter.getpostman.com/view/32993281/2sB3HqHyLC).
 
 ---
 
@@ -88,4 +46,5 @@ SKU0003,Product 3,Home,416.91,104,inactive
 3. Build docker image `docker-compose build`
 4. Start container `docker-compose up`
 5. Apply migrations `docker-compose exec web python manage.py migrate`
-6. Project should be live at localhost port 8000.
+6. Create superuser with command `docker-compose exec web python manage.py createsuperuser`
+7. Project should be live at localhost port 8000.
